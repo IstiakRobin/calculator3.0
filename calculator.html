@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Review Calculator</title>
+  <link rel="stylesheet" type="text/css" href="./assets/style.css">
+  <style>
+    /* CSS for applying gradient background using custom property */
+    .rating-container input[type="range"] {
+      background: var(--slider-background, none);
+    }
+  </style>
+</head>
+<body>
+  <div class="row main-row">
+    <div class="radius-row">
+      <div class="row content-c">
+        <!-- Content if needed -->
+      </div>
+      <p class="top-txt">Antal 5<span><img class="icon-img2" style="height:12px;" src="https://popcard.ehandelsbyran.se/wp-content/uploads/2023/08/star-2.png" alt="Icon"></span> omdömen som behövs:</p>
+
+
+      <div class="result" id="bipcard-result"></div>
+      <div class="border-box">
+        <div class="rating-container">
+          <div class="label-input-container">
+            <label for="bipcard-desired-rating">Önskad rating:</label>
+            <div class="label_input_continer_two">
+              <input type="range" id="bipcard-desired-rating" min="0" max="5" step=".1" oninput="updateDesiredRatingValue()" />
+              <span class="rating-value" id="bipcard-desired-rating-value">1.0</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="rating-container">
+          <div class="label-input-container">
+            <label for="bipcard-rating">Rating just nu:</label>
+            <div class="label_input_continer_two">
+              <input type="range" id="bipcard-rating" min="0" max="5" step=".1" oninput="updateRatingValue(); updateSliderBackground(this);" />
+              <span class="rating-value" id="bipcard-rating-value">3.5</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="rating-container">
+          <div class="label-input-container">
+            <label for="bipcard-reviews">Antal Omdömen:</label>
+            <div class="label_input_continer_two">
+              <input type="range" id="bipcard-reviews" min="0" max="2000" oninput="updateReviewsValue(this.value); updateSliderBackground(this);" />
+              <span class="rating-value" id="bipcard-reviews-value">100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <button class="calculate-btn" id="bipcard-calculate-btn" onclick="calculateScore()">Köp Bipcard</button>
+
+
+      <div class="icon-container">
+        <img class="icon-img" src="https://popcard.ehandelsbyran.se/wp-content/uploads/2023/08/.png" alt="Icon">
+        <span>Boosta insamling av omdömen med upp till 10x</span>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="./assets/script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      initializeSliders();
+    });
+
+    function updateSliderBackground(rangeInput) {
+      var currentValue = parseFloat(rangeInput.value);
+      var colorStop = ((currentValue - rangeInput.min) / (rangeInput.max - rangeInput.min)) * 100;
+      rangeInput.style.background = `linear-gradient(to right, #6461FC ${colorStop}%, #ECECEC ${colorStop}%)`;
+    }
+
+    function initializeSliders() {
+      var sliderIds = ["bipcard-rating", "bipcard-desired-rating", "bipcard-reviews"];
+
+      sliderIds.forEach(function (inputId) {
+        var rangeInput = document.getElementById(inputId);
+
+        rangeInput.addEventListener("input", function () {
+          updateSliderBackground(rangeInput);
+        });
+
+        rangeInput.addEventListener("mouseup", function () {
+          updateSliderBackground(rangeInput);
+        });
+
+        updateSliderBackground(rangeInput);
+      });
+    }
+
+    function calculateScore() {
+      var reviews = parseInt(document.getElementById("bipcard-reviews").value);
+      var rating = parseFloat(document.getElementById("bipcard-rating").value);
+      var desiredRating = parseFloat(document.getElementById("bipcard-desired-rating").value);
+
+      if (isNaN(reviews) || isNaN(rating) || isNaN(desiredRating) || rating < 0 || rating > 5 || desiredRating < 0 || desiredRating > 5) {
+        document.getElementById("bipcard-result").innerHTML = "Please enter valid values.";
+        return;
+      }
+
+      var currentScore = reviews * rating;
+      var desiredScore = reviews * desiredRating;
+
+    
+      if (desiredRating === 5) {
+        if (rating === 5) {
+          document.getElementById("bipcard-result").innerHTML = "You already have the desired rating.";
+        } else {
+          var targetReviews = Math.ceil((desiredScore - currentScore) / (5 - rating));
+          document.getElementById("bipcard-result").innerHTML = targetReviews + "st";
+        }
+      } else if (desiredRating <= rating) {
+        document.getElementById("bipcard-result").innerHTML = "You already have the desired rating.";
+      } else {
+        var targetReviews = Math.ceil((desiredScore - currentScore) / (5 - desiredRating));
+        document.getElementById("bipcard-result").innerHTML = targetReviews + "st";
+      }
+    }
+
+    function updateRatingValue() {
+      var ratingValue = parseFloat(document.getElementById("bipcard-rating").value);
+      document.getElementById("bipcard-rating-value").innerHTML = ratingValue.toFixed(1);
+    }
+
+    function updateDesiredRatingValue() {
+      var desiredRatingValue = parseFloat(document.getElementById("bipcard-desired-rating").value);
+      if (desiredRatingValue === 5) {
+        document.getElementById("bipcard-desired-rating-value").innerHTML = "5.0";
+      } else {
+        document.getElementById("bipcard-desired-rating-value").innerHTML = desiredRatingValue.toFixed(1);
+      }
+    }
+
+    function updateReviewsValue(value) {
+      var rangeInput = document.getElementById("bipcard-reviews");
+      var span = document.getElementById("bipcard-reviews-value");
+      var percent = ((value - rangeInput.min) / (rangeInput.max - rangeInput.min)) * 100;
+      span.textContent = Math.round(value);
+
+      updateSliderBackground(rangeInput);
+    }
+  </script>
+</body>
+</html>
